@@ -1,26 +1,60 @@
-import  Head  from "next/head";
+import { registerValidation } from "@/utils/validationSchema";
+import axios from "axios";
+import { useFormik } from "formik";
+import Head from "next/head";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+
+interface FormikConfig {
+  userName: string;
+  password: string;
+  email: string;
+  confirmPassword: string;
+}
+
+const initialValues: FormikConfig = {
+  userName: "",
+  password: "",
+  email: "",
+  confirmPassword: "",
+};
 
 const Register = () => {
   const [hideAndShowPass, setHideAndShowPass] = useState(false);
   const [hideAndShowConPass, setHideAndShowConPass] = useState(false);
+
+  const { handleBlur, errors, values, handleChange, touched, handleSubmit } =
+    useFormik<FormikConfig>({
+      initialValues,
+      validationSchema: registerValidation,
+      onSubmit: async (value) => {
+        try {
+          const sendClientData = await axios.post('/api/auth/register', {
+            clientData: value
+          })
+          console.log(value);
+        } catch (error) {
+          console.error(error);
+          throw new Error("error while submitting the form");
+        }
+      },
+    });
 
   useEffect(() => {
     if (hideAndShowPass) {
       setTimeout(() => setHideAndShowPass(false), 10000);
     }
 
-    if(hideAndShowConPass){
-        setTimeout(() => setHideAndShowConPass(false), 10000);
+    if (hideAndShowConPass) {
+      setTimeout(() => setHideAndShowConPass(false), 10000);
     }
-  }, [hideAndShowPass,hideAndShowConPass]);
+  }, [hideAndShowPass, hideAndShowConPass]);
 
   return (
     <>
-    <Head>
+      <Head>
         <title>Task - Sign Up</title>
-    </Head>
+      </Head>
       <div className="h-screen  flex justify-center items-center">
         <div className="w-full h-full flex justify-center items-center gap-8">
           <div
@@ -49,33 +83,65 @@ const Register = () => {
               </p>
 
               <div className="w-[80%] mt-10 flex flex-col justify-start items-start gap-6">
-                <div className="w-full">
+                <div className="w-full relative">
                   <input
                     type="text"
+                    name="userName"
+                    value={values.userName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="Full Name"
-                    className="w-full rounded-lg
+                    className={`w-full rounded-lg
                    border border-[#ccc]  outline-none
-                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400]"
+                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400] ${
+                      errors.userName &&
+                      touched.userName &&
+                      "ring-1 border-none ring-red-500"
+                    }`}
                   />
+
+                  <span className="absolute w-full text-sm text-red-500 text-center left-0 -bottom-5">
+                    {errors.userName && touched.userName && errors.userName}
+                  </span>
                 </div>
-                <div className="w-full">
+                <div className="w-full relative">
                   <input
                     type="text"
                     placeholder="Email ID"
-                    className="w-full rounded-lg
+                    name="email"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.email}
+                    className={`w-full rounded-lg
                    border border-[#ccc]  outline-none
-                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400]"
+                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400] ${
+                      errors.email &&
+                      touched.email &&
+                      "ring-1 ring-red-500 border-none"
+                    }`}
                   />
+
+                  <span className="absolute w-full text-sm text-red-500 text-center left-0 -bottom-5">
+                    {errors.email && touched.email && errors.email}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center gap-3 w-full">
                   <div className="w-[50%] relative">
                     <input
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
                       type={`${hideAndShowPass ? "text" : "password"}`}
                       placeholder="Password"
-                      className="w-full rounded-lg
+                      className={`w-full rounded-lg
                    border border-[#ccc]  outline-none
-                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400]"
+                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400] ${
+                      errors.password &&
+                      touched.password &&
+                      "ring-1 ring-red-500 border-none"
+                    }`}
                     />
                     <img
                       onClick={() => setHideAndShowPass(!hideAndShowPass)}
@@ -85,14 +151,26 @@ const Register = () => {
                       src="../EyeIcon.png"
                       alt="eye-icon"
                     />
+
+                    <span className="absolute w-full text-sm text-red-500 text-center left-0 -bottom-7">
+                      {errors.password && touched.password && errors.password}
+                    </span>
                   </div>
                   <div className="w-[50%] relative">
                     <input
+                      name="confirmPassword"
+                      value={values.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
                       type={`${hideAndShowConPass ? "text" : "password"}`}
                       placeholder="Confirm Password"
-                      className="w-full rounded-lg
+                      className={`w-full rounded-lg
                    border border-[#ccc]  outline-none
-                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400]"
+                    focus:outline-none bg-[#202020] text-[#ccc] text-[15px] px-4 py-3 font-[Montserrat] font-[400] ${
+                      errors.confirmPassword &&
+                      touched.confirmPassword &&
+                      "ring-1 ring-red-500 border-none"
+                    }`}
                     />
                     <img
                       onClick={() => setHideAndShowConPass(!hideAndShowConPass)}
@@ -102,10 +180,20 @@ const Register = () => {
                       src="../EyeIcon.png"
                       alt="eye-icon"
                     />
+
+                    <span className="absolute w-full text-sm text-red-500 text-center left-0 -bottom-7">
+                      {errors.confirmPassword &&
+                        touched.confirmPassword &&
+                        errors.confirmPassword}
+                    </span>
                   </div>
                 </div>
 
-                <button className="border-white text-lg border text-white font-[Montserrat] font-[500] px-4 py-2 rounded-2xl hover:rounded transition-all duration-150 ease-in-out hover:text-[#008ed7] hover:bg-white">
+                <button
+                  onClick={handleSubmit}
+                  type="submit"
+                  className="border-white text-lg border text-white font-[Montserrat] font-[500] px-4 py-2 rounded-2xl hover:rounded transition-all duration-150 ease-in-out hover:text-[#008ed7] hover:bg-white mt-5"
+                >
                   Sign Up
                 </button>
               </div>
